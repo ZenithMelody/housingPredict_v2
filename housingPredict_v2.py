@@ -44,10 +44,26 @@ print(f"\nBest parameters: {grid_search.best_params_}")
 print(f"Best training accuracy: {grid_search.best_score_:.2%}")
 
 # --- Evaluation ---
-best_model = grid_search.best_estimator_ # take best version
-y_pred = best_model.predict(X_test)
+print("-" * 40)
+option_Model = input("Enable diagnostic mode? (Y/N): ").upper()
 
+if option_Model == "Y":
+    print("Diagnostic mode -  for experimentation purposes")
+    # to find outliers - e.g Tiny C + Extreme Bias
+    best_model = LogisticRegression(C=0.000001, class_weight={0: 1, 1: 1000}, max_iter=5000)
+    diagnostic = True 
+elif "N":
+    print("Best performance mode - for production use")
+    # from your Grid Search results
+    best_model = LogisticRegression(C=0.01, penalty='l2', solver='lbfgs', max_iter=5000)
+    diagnostic = False
+else:
+    print("Invalid input, please enter either Y or N")
+
+best_model.fit(X_train, y_train)
+y_pred = best_model.predict(X_test)
 print("--- Model Performance ---")
+print(f"Is Diagnostic Mode enabled? {diagnostic}")
 print(f"Accuracy: {metrics.accuracy_score(y_test, y_pred):.2%}")
 print(f"Confusion Matrix:\n {metrics.confusion_matrix(y_test, y_pred)}")
 print("-" * 40)
